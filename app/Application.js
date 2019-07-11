@@ -26,7 +26,7 @@ sys_system_system = 0;
 sys_system_menustring = "";
 end_date = new Date();
 start_date = new Date(end_date.getFullYear(), end_date.getMonth(), 1);
-
+sys_option_min_date=start_date;
 current_newid = 0;
 sys_DisplayAll = 1;
 oldthis = this;
@@ -75,7 +75,7 @@ Ext.define('MyApp.Application', {
         end_date = new Date();
         start_date = new Date(end_date.getFullYear(), end_date.getMonth(), 1);
 
-        
+        sys_option_min_date=start_date;
         sys_DisplayAll = 1;
         oldthis = this;
         mainApp = this;

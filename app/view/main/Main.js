@@ -367,7 +367,8 @@ function change_password() {
                     padding: '0 5 10 5',
                     value: '<div style="margin:5px 0px 0px 80px;color:red">(如果图片不清晰请单击图片更换图片)</div>'
 
-                }],
+                }
+            ],
             buttons: [{
                 id: "submitButton",
                 text: '确认更改',
@@ -404,14 +405,19 @@ function change_password() {
                        minWidth: 400
                    });
                    */
-                //Ext.Msg.alert('注意！', "两次新密码输入不一致！");
-                Ext.toast.msg('注意！', '两次新密码输入不一致！');
-                //  Ext.MessageBox.alert('注意！', '两次新密码输入不一致！');
+              // Ext.Msg.alert('注意！', "两次新密码输入不一致！");
+
+
+               
+
+               // Ext.toast.msg('注意！', '两次新密码输入不一致！');
+                 Ext.MessageBox.alert('注意！', '两次新密码输入不一致！',function(){
                 var obj = apploginForm.form.findField("newpassword2");
                 if (obj) {
                     obj.focus();
                 }
                 return;
+            });
 
             }
             apploginForm.form.doAction('submit', {
@@ -434,15 +440,23 @@ function change_password() {
                         sys_userInfo = obj;
                     } else {
                         if (parseInt(result.userid) < 0) {
-                            Ext.toast.msg('注意！', result.username);
-                            var obj = apploginForm.form.findField("VerifyCode");
+                            //Ext.toast.msg('注意！', result.username);
+                            //Ext.toast.msg('注意！', '两次新密码输入不一致！');
+                           // Ext.Msg.alert('注意！',result.username);
+
+                          Ext.Msg.alert('注意！',result.username,function(){  
+                          var obj = apploginForm.form.findField("VerifyCode");
                             if (obj) {
                                 obj.focus();
                             }
+                        });
                         } else {
                             apploginWin.destroy();
-                            Ext.MessageBox.alert('注意！', result.username);
-                            pagereset();
+                            
+                            Ext.Msg.alert('注意！',result.username,function(){  
+                                pagereset();
+                              });
+
                         }
                     }
 
@@ -450,6 +464,7 @@ function change_password() {
                 failure: function (form, action) {
                     var result = action.result.data;
                     Ext.MessageBox.alert('注意！', action.result.data.username);
+
                 }
             });
         }
@@ -704,7 +719,8 @@ function system_setting() {
                                  minWidth: 400
                              });
                              */
-                            Ext.toast.msg('注意！', ' 验证码错误！');
+                            //Ext.toast.msg('注意！', ' 验证码错误！');
+                            Ext.Msg.alert('注意！',' 验证码错误！');
                             //Ext.MessageBox.alert('注意！', ' 验证码错误！');
                             var obj = appsettingForm.form.findField("_VerifyCode");
                             if (obj) {
@@ -753,7 +769,7 @@ function user_login() {
     apploginForm = new Ext.form.FormPanel({
         labelAlign: 'left',
         buttonAlign: 'center',
-        bodyStyle: 'padding:5px',
+        bodyStyle: 'padding:0px',
         frame: true,
 
         defaults: {
@@ -778,7 +794,7 @@ function user_login() {
                 name: 'username',
                 id: 'username',
                 fieldLabel: '用户ID',
-                padding: '20 20 10 20',
+                padding: '20 20 5 20',
                 allowBlank: false,
                 value: sys_userInfo.username,
                 listeners: {
@@ -798,7 +814,7 @@ function user_login() {
                 inputType: 'password',
                 id: 'password',
                 validationOnChange: false,
-                padding: '0 20 10 20',
+                padding: '0 20 5 20',
                 fieldLabel: '登录密码',
                 mixLength: 4,
                 maxLength: 20,
@@ -818,7 +834,7 @@ function user_login() {
             }, {
                 name: 'VerifyCode',
                 id: 'VerifyCode',
-                padding: '0 20 10 20',
+                padding: '0 20 5 20',
                 fieldLabel: '验证码 ',
                 mixLength: 4,
                 maxLength: 6,
@@ -839,16 +855,18 @@ function user_login() {
                 xtype: 'box',
                 height: 80,
                 //border:1,
-                padding: '0 5 10 5',
+                padding: '0 5 5 5',
                 html: '<div  style="margin:5px 0px 0px 65px"><a href="#"><img id="loginvcode" alt="如果图片不清晰请单击图片更换图片。" onclick="javascript:appchangeCode(1)" onload="javascript:appchangeCode(0)"   id="code" height="82" width="292" src="vcode.php" border="0"></a></div>',
                 border: false
             }, {
                 xtype: 'displayfield',
                 height: 30,
-                padding: '0 5 10 5',
+                padding: '0 5 5 5',
                 value: '<div style="margin:5px 0px 0px 80px;color:red">(如果图片不清晰请单击图片更换图片)</div>'
 
-            }],
+            } 
+        
+        ],
         buttons: [{
             id: "submitButton",
             text: '登录',
@@ -882,30 +900,17 @@ function user_login() {
         closeAction: 'destroy',
         border: false,
         hasvcode: false,
-        /*
-        tools: [{
-            type: 'refresh',
-            tooltip: 'system setting',
-            handler: function () {
-                //this.up("#LeftTree").getStore().reload();
-                //console.log('system setting');
-                system_setting();
-            }
-        }],*/
         items: [apploginForm]
     }
     ).show();
 
-    // console.log("111111111 1");
     appsubmit = function () {
         if (apploginForm.form.isValid()) {
             var loginname = Ext.getCmp("username").getValue();
             if ((sys_customer_id == 0) && (loginname.length == 0)) {
-
                 Ext.MessageBox.alert('注意！', " 请输入用户名称或用户ID！");
                 return;
             }
-
 
             var psw = base64encode(Ext.getCmp("password").getValue());
             apploginForm.form.doAction('submit', {
@@ -921,7 +926,6 @@ function user_login() {
 
                 success: function (form, action) {
                     var result = action.result.data;
-                    console.log(result);
                     if (parseInt(result.userid) > 0) {
                         var lidstring = result.lidstring;
                         sys_system_menustring = lidstring;
@@ -936,12 +940,11 @@ function user_login() {
                         sys_system_del = parseInt(result.del);
                         sys_system_new = parseInt(result.new);
                         sys_system_lastdel = parseInt(result.lastdel);
-                        // sys_location_areas=parseInt(result.areas);
-                        //sys_system_system = result.system;
+                        sys_option_min_date=result.mindate;
                         cp0.set('userid', result.userid);
+                        cp0.set('option_min_date', result.mindate);
                         cp0.set('username', result.username);
                         apploginWin.destroy();
-                        //   console.log(Tongji(lidstring, ','), lidstring, Tongji('', ','));
                         if ((loginname.length > 0) && (sys_customer_id == 0)) {
                             if (Tongji(lidstring, ',') != 2) {
                                 treeSelect('ckmc', this, lidstring, '', true);
@@ -952,39 +955,40 @@ function user_login() {
                             cp0.set('sys_location_id', sys_location_id);
                             logingl()
                         } else {
-                            // console.log("createmenu");
                             createmenu();
                         }
                     } else {
                         if (parseInt(result.userid) < 0) {
-                            Ext.toast.msg('注意！', ' 验证码错误！');
+                            
+                             Ext.MessageBox.alert('注意！', "验证码错误！",function(){
 
-                            /* Ext.toast({
-                                 html: "验证码错误！",
-                                 closable: true,
-                                 title: '注意！',
-                                 align: 't',
-                                 slideInDuration: 200,
-                                 minWidth: 400
-                             });*/
-
-                            // Ext.Msg.alert('注意！', ' 验证码错误！');
-
-                            var obj = apploginForm.form.findField("VerifyCode");
-                            if (obj) {
-                                obj.focus();
+                             var obj = apploginForm.form.findField("VerifyCode");
+                             if (obj) {
+                                 obj.focus();
+                             }
                             }
+                            );
                         } else {
                             apploginWin.destroy();
-                            Ext.MessageBox.alert('注意！',result.username );
-                            pagereset();
+                            Ext.MessageBox.alert('注意！',result.username,function()
+
+                            {
+                                pagereset(); 
+                            }
+                             );
+                    
+                            
                         }
                     }
 
                 },
                 failure: function (form, action) {
+                    
                     var result = action.result.data;
-                    Ext.MessageBox.alert('注意!!', "用户登录失败！！");
+                   
+                  Ext.MessageBox.alert('注意！',result.username);
+                
+                  
                 }
             });
         }
@@ -1040,11 +1044,12 @@ function vip_login() {
                 hidden: true,
                 value: sys_customer_id
             },
+           
             {
                 name: 'username',
                 id: 'username',
                 fieldLabel: '客户ID',
-                padding: '20 20 10 20',
+                padding: '20 20 5 20',
                 allowBlank: true,
                 // value: sys_userInfo.username,
                 listeners: {
@@ -1064,7 +1069,7 @@ function vip_login() {
                 //inputType: 'password',
                 id: 'smsphone',
                 validationOnChange: false,
-                padding: '0 20 10 20',
+                padding: '0 20 5 20',
                 fieldLabel: '手机号码',
                 mixLength: 4,
                 maxLength: 20
@@ -1081,7 +1086,7 @@ function vip_login() {
                 handler: function () {
                     var id = Ext.getCmp("username").value;
                     var sms = Ext.getCmp("smsphone").value;
-                    console.log('发送验证码', id, sms);
+                   // console.log('发送验证码', id, sms);
 
                     Ext.Ajax.request({
                         url: 'smsvcode.php',
@@ -1094,13 +1099,8 @@ function vip_login() {
                         },
                         success: function (response) {
 
-                            //console.log(response);
                             var result = Ext.util.JSON.decode(response.responseText);
-                            //console.log(result1);
-                            //var result = result1.data;
-                            //console.log(result,result["result"],result.result);
                             if (result["result"] == "success") {
-                                //Ext.MessageBox.alert('注意！', "</br></br>验证码已发到你的手机上，请在下面输入验证码再提交！</br></br>");
                                 Ext.getCmp("smsbutton").setText("重发送验证码");
                                 Ext.getCmp("VerifyCode").setDisabled(false);
                             } else {
@@ -1214,7 +1214,7 @@ function vip_login() {
 
                 success: function (form, action) {
                     var result = action.result.data;
-
+               //     console.log('result',result)  ;
                     if (parseInt(result.userid) > 0) {
 
                         var obj = { username: "", password: psw, userid: result.userid, khsystem: "1" };
@@ -1223,22 +1223,23 @@ function vip_login() {
                         sys_customer_id = result.userid;
                         apploginWin.destroy();
 
-                        // if (loginname.length > 0)  {
-                        //   logingl()
-                        // } else {
                         createmenu();
-                        // }
                     } else {
                         if (parseInt(result.userid) < 0) {
-                            Ext.toast.msg('注意！', ' 验证码错误！');
+
+                       
+                            Ext.Msg.alert('注意！',' 验证码错误！');
                             var obj = apploginForm.form.findField("VerifyCode");
                             if (obj) {
                                 obj.focus();
                             }
                         } else {
                             apploginWin.destroy();
-                            Ext.MessageBox.alert('注意！', result.username);
-                            pagereset();
+                            Ext.MessageBox.alert('注意！',result.username,function()
+                            {
+                                pagereset(); 
+                            }
+                             );
                         }
                     }
 
@@ -1246,6 +1247,7 @@ function vip_login() {
                 failure: function (form, action) {
                     var result = action.result.data;
                     Ext.MessageBox.alert('注意!!', action.result.data.username);
+                   
                 }
             });
         }
@@ -1543,15 +1545,9 @@ function useractive() {
 
                         window.location=window.location.href;
 
-                       // appuseractiveWin.destroy();
-                       // if (sys_system_name == "" || sys_system_name == undefined) {
-                       //     system_setting();
-                       // } else {
-                       //     user_login();
-                       // }
                     } else {
                         if (parseInt(result.userid) < 0) {
-                            Ext.toast.msg('注意！', ' 验证码错误！');
+                            Ext.Msg.alert('注意！',' 验证码错误！');
                             var obj = appuseractiveForm.form.findField("VerifyCode");
                             if (obj) {
                                 obj.focus();

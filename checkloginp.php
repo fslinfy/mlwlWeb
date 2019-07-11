@@ -11,16 +11,16 @@ $vcode = strtoupper($_SESSION['VerifyCode']);
 if ($_POST['act']==""){}else{
 	if ($_POST['password'] == "exit") {
 		$arr['success'] = true;
-		$arr['data'] = array('userid' => 0, 'username' => '用户登录失败！！');
-		echo json_encode($arr);
+		$arr['data'] = array('userid' => 0, 'username' => urlencode('用户登录失败！！'));
+		echo urldecode(json_encode($arr));
 		return;
 	}
 }
 
 if (strtoupper($_SESSION['VerifyCode']) != strtoupper($_POST['VerifyCode'])) {
 	$arr['success'] = true;
-	$arr['data'] = array('userid' => -1, 'username' => '1 验证码错误！');
-	echo json_encode($arr);
+	$arr['data'] = array('userid' => -1, 'username' =>urlencode( '1 验证码错误！'));
+	echo urldecode(json_encode($arr));
 	return;
 }
 
@@ -118,7 +118,6 @@ function sysuserlogin() {
 	$p_khid = $_POST['p_khid'];
 	$username = $_POST['username'];
 	$userid =(int)$_POST['username'];
-	//return $userid;
 	$userpsw =base64_encode($_POST['password']);
 
 
@@ -130,16 +129,16 @@ function sysuserlogin() {
 	//	else
 	//	{
 			if ($p_khid == "0") {
-				$sqlstr = "select u.userid,u.username,u.lastdel,t.edit,t.sh,t.del,t.cwsh,t.new,U.lidstring,0 as khsystem,u.smsactive from users u ,usertype t
+				$sqlstr = "select u.userid,u.username,u.lastdel,t.edit,t.sh,t.del,t.cwsh,t.new,U.lidstring,0 as khsystem,u.smsactive,u.locked, option_min_date(".$p_l_id.") AS minrq  from users u ,usertype t
 				where t.typeid=u.typeid and u.active=1 ";
 			} 
 			else 
 			{
-				$sqlstr = "select u.*,0 as khsystem from khusers u where u.active=1  and u.khid=" . $p_khid;
+				$sqlstr = "select u.*,0 as khsystem, option_min_date(".$p_l_id.") AS minrq from khusers u where u.active=1  and u.khid=" . $p_khid;
 
 			}	
 			//if ($userid>0){
-				//$sqlstr .= " and  u.userid=" . $userid ;
+			//	$sqlstr .= " and  u.userid=" . $userid ;
 				$sqlstr .= " and ( u.userid=" . $userid . " or  u.username='" . $username . "') ";
 			//}else{
 		//		$sqlstr .= " and   u.username='" . $username . "' ";
@@ -149,17 +148,19 @@ function sysuserlogin() {
     		
 			$sqlstr .= " and  u.password='" . $userpsw . "'";
 	//}
-	$id = "0";
+	$id = 0;
+	$locked = 0;
 	$name = "";
 	$lidstring = "";
 	$sh = 0;
 	$cwsh = 0;
 	$edit = 0;
-		$smsactive = 0;
+	$smsactive = 0;
 	$del = 0;
 	$lastdel = 0;
 	$new = 0;
 	$khsystem=0;
+	$minrq='';
 	$E_name = "";
 	//return $sqlstr;
 	$sqlstr1 = "";
@@ -168,10 +169,12 @@ function sysuserlogin() {
 	if ($query) {
 		while ($row = mysql_fetch_array($query)) {
 			$id =(int)$row['userid'];
+			$locked=(int)$row['locked'];
 			$name = $row['username'];
 			$del = $row['del'];
 			$lastdel = $row['lastdel'];
 			$sh = $row['sh'];
+			$minrq = $row['minrq'];
 			$cwsh = $row['cwsh'];
 			$edit = $row['edit'];
 			$smsactive=$row['smsactive'];
@@ -181,19 +184,29 @@ function sysuserlogin() {
 			break;
 		}
 	}
-    if ($smsactive==0)
-	{
+
+	if ($id==0) {
 		$arr['success'] = true;
-		$arr['data'] = array('userid' => 0, 'username' => urlencode('请用户先激活再进行登录操作！！！ ').$sqlstr);
+		$arr['data'] = array('userid' => 0, 'username' => urlencode('用户ID或用户名称或密码错误，登录失败！！！'));
+		return urldecode(json_encode($arr));
+	}
+	if ($locked>0) {
+		$arr['success'] = true;
+		$arr['data'] = array('userid' => 0, 'username' => urlencode('此用户已被锁，请系统管理员解锁后再登录！！！'));
 		return urldecode(json_encode($arr));
 	}
 
-	if ($id <1) {
+
+    if ($smsactive==0)
+	{
 		$arr['success'] = true;
-		$arr['data'] = array('userid' => 0, 'username' => urlencode('用户ID或用户名称或密码错误，登录失败！！！ '));
-	} else {
+		$arr['data'] = array('userid' => 0, 'username' => urlencode('请用户先激活再进行登录操作！！！ '));
+		return urldecode(json_encode($arr));
+	}
+       
+
 		$arr['success'] = true;
-		$arr['data'] = array('userid' => $id, 'username' => urlencode($name), 'lidstring' => $lidstring,'sh' => $sh, 'cwsh' => $cwsh, 'edit' => $edit, 'del' => $del, 'lastdel' => $lastdel, 'new' => $new, 'khsystem' => $khsystem);
+		$arr['data'] = array('userid' => $id, 'username' => urlencode($name), 'lidstring' => $lidstring,'sh' => $sh, 'cwsh' => $cwsh, 'edit' => $edit, 'del' => $del, 'lastdel' => $lastdel, 'new' => $new, 'khsystem' => $khsystem,'mindate'=>$minrq);
 		if ($username=="")
 		{}else{
 			if ($p_khid == "0") {
@@ -205,7 +218,7 @@ function sysuserlogin() {
 		
 			$query = mysql_query($sqlstr1);
 		}
-	}
+	
 	return urldecode(json_encode($arr));
 
 	//$arr['success'] = true;
